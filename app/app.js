@@ -4,7 +4,7 @@ const fields=['sender','subject','body'];
 async function bootstrap(){
  try{
    const st=await (await fetch('/api/status')).json();mode=st.mode;
-   $('mode').textContent=mode==='solar_pro_4'?'● Solar Pro 4 실시간 분석':'● 로컬 예시 모드 · 규칙 기반';
+   $('mode').textContent=mode==='solar_pro_4'?'● 별도 API · Solar Pro 4':'● 오프라인 · 규칙 기반 예시';
    $('mode').className=mode==='solar_pro_4'?'mode':'mode demo';
    const cases=await (await fetch('/api/samples')).json();
    $('samples').replaceChildren();cases.forEach(x=>{
@@ -22,6 +22,8 @@ function showResult(r){
  $('risk').textContent='위험 수준 · '+r.risk_level;
  const cls=r.risk_level==='높음'?'high':r.risk_level==='보통'?'mid':'';
  $('risk').className='risk '+cls;$('bar').className='bar '+cls;
+ $('importance').textContent='메일 중요도: '+(r.importance||'미제공')+' · 보안 대응 우선순위: '+(r.security_priority||'미제공');
+ $('timeline').replaceChildren();const times=r.timeline||[];if(!times.length){$('timeline').textContent='원문에서 추출된 구체 일정 없음';}else{times.forEach(t=>{const line=document.createElement('p');line.textContent=(t.type||'일정')+' · '+(t.raw_text||'')+(t.note?' — '+t.note:'');line.style.margin='4px 0';$('timeline').append(line);});}
  $('reason').textContent=r.reason;
  $('signals').replaceChildren();(r.signals||[]).forEach(item=>{const s=document.createElement('span');s.className='pill';s.textContent=item;$('signals').append(s);});
  $('actions').replaceChildren();(r.actions||[]).forEach((item,i)=>{const row=document.createElement('p');row.textContent=(i+1)+'. '+item;row.style.margin='4px 0';$('actions').append(row);});
