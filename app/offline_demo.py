@@ -4,6 +4,7 @@ Only intended for synthetic-email demonstrations. Unverified mail should never
 be treated as verified-safe by a local heuristic.
 """
 import re
+from app.schedule_extractor import extract_schedule
 
 PHISH_REQUESTS = [
     r"(?:비밀번호|인증번호|OTP|일회용\s*코드).{0,42}(?:회신|입력|전송|보내|알려|전달)",
@@ -83,6 +84,6 @@ def analyze(sender: str, subject: str, body: str) -> dict:
     note='분석 범위는 텍스트에 한정됩니다. 발신자 인증·링크 도착지·첨부파일 검사는 수행하지 않았습니다.'
     return {
         'category':category,'risk_level':risk,'importance':importance,'security_priority':priority,
-        'signals':indicators,'timeline':times,'actions':actions,
+        'signals':indicators,'timeline':times,'schedule_items':extract_schedule(subject,body),'actions':actions,
         'uncertainty':note, 'engine':'offline_rule_only',
     }

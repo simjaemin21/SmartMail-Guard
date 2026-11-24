@@ -57,7 +57,7 @@ SAMPLES = {
     "7. 정상 · 본선 진출 후 LMS·설문 제출 알림": {
         "sender": "contest-office@example.test",
         "subject": "[공모전] 본선 진출자 LMS·설문 미제출 안내 (11/24(화) 낮 12시까지)",
-        "body": "본선 진출을 축하드립니다. LMS 가입과 설문 제출이 아직 확인되지 않아 다시 안내드립니다. 11월 24일(화) 낮 12시까지 완료해 주세요. 오후 1시에 등록 완료 예정입니다. 플랫폼 설문 제출 마감은 11월 24일(화) 오후 11시 59분까지입니다. 이미 완료했다면 이 메일을 무시해 주세요.",
+        "body": "본선 진출을 축하드립니다. LMS 가입과 설문 제출이 아직 확인되지 않아 다시 안내드립니다. 11월 24일(화) 낮 12시까지 완료해 주세요. 11월 24일(화) 오후 1시에 등록 완료 예정입니다. 플랫폼 설문 제출 마감은 11월 24일(화) 오후 11시 59분까지입니다. 이미 완료했다면 이 메일을 무시해 주세요.",
     },
 }
 
@@ -197,12 +197,21 @@ def show_free_demo():
         l, r = st.columns(2)
         with l:
             with st.container(border=True):
-                st.markdown("#### 🗓️ 날짜·시간 표현 (규칙)")
-                if d['timeline']:
-                    for v in d['timeline']:
-                        st.write("• " + v)
+                st.markdown("#### 🗓️ 언제, 무엇을 해야 하나요? (규칙)")
+                schedule = d.get('schedule_items', [])
+                if schedule:
+                    for event in schedule:
+                        st.markdown(f"**{event['when']}** · {event['kind']}")
+                        st.write(f"{event['task']} ({event['actor']})")
+                        with st.expander("원문 근거", expanded=False):
+                            st.caption(event['evidence'])
+                elif d.get('timeline'):
+                    st.caption("시간 표현은 있지만 관련 행동을 확실하게 연결하지 못했습니다.")
+                    for time_text in d['timeline']:
+                        st.write("• " + time_text)
                 else:
-                    st.caption("추출된 시간 표현 없음")
+                    st.caption("확인된 일정 없음")
+                st.caption("날짜·행동 연결은 텍스트 규칙에 따른 참고용 결과이며 실제 일정 등록이나 발신자 확인은 하지 않습니다.")
         with r:
             with st.container(border=True):
                 st.markdown("#### ✅ 대응 제안 (규칙)")
