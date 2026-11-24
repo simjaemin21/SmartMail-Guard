@@ -1,0 +1,15 @@
+SmartMail Guard API 크레딧 부족 안내 패치 (추가 비용 없음)
+
+포함: app/solar_engine.py, streamlit_app.py, tests/test_api_credit_error.py
+
+PowerShell에서 기존 GitHub 프로젝트 루트에 압축을 풀고:
+  python tests/test_solar_deploy.py
+  python tests/test_api_credit_error.py
+
+API에서 크레딧 부족을 보고하면 화면에 다음 메시지를 표시합니다.
+  사용 가능한 AI 토큰(크레딧)이 부족합니다. 현재 분석을 진행할 수 없습니다.
+429 요청 제한은 토큰 부족으로 잘못 표현하지 않고 별도 안내합니다.
+중단 시 가짜 규칙 분석으로 전환하지 않습니다.
+
+중요: 이 패치는 청구 자체를 차단하는 과금 상한은 아닙니다. 실행 계정의
+결제 정책 및 크레딧을 별도로 확인해야 합니다.

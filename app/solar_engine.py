@@ -60,6 +60,42 @@ class ProviderError(RuntimeError):
     """Safe client-facing error that does not expose headers or email content."""
 
 
+class CreditsExhaustedError(ProviderError):
+    """Provider explicitly reported missing API credit/balance/quota.
+
+    Distinct from short-lived HTTP 429 rate limiting and account permissions.
+    """
+
+
+def _looks_like_credit_exhaustion(http_code: int, payload: bytes) -> bool:
+    """Only report credit exhaustion for a credible API error signal.
+
+    Provider formats vary. Do not expose the provider response verbatim in the UI.
+    """
+    if http_code == 402:
+        return True
+    if not payload:
+        return False
+    try:
+        body = json.loads(payload.decode('utf-8', errors='replace'))
+    except (ValueError, UnicodeError):
+        return False
+    error = body.get('error', {}) if isinstance(body, dict) else {}
+    if isinstance(error, dict):
+        fields = [error.get(k, '') for k in ('code', 'type', 'message', 'detail')]
+    else:
+        fields = [error]
+    if isinstance(body, dict):
+        fields.extend(body.get(k, '') for k in ('code', 'message', 'detail'))
+    description = ' '.join(str(x) for x in fields).lower()
+    return any(term in description for term in (
+        'insufficient_quota', 'insufficient_balance', 'insufficient_credit',
+        'credit_exhausted', 'credits_exhausted', 'balance_exhausted',
+        'quota exhausted', 'out of credits', 'not enough credits',
+        'insufficient funds', 'no remaining credit', 'credit balance',
+    ))
+
+
 def suspicious_signals(subject: str, body: str) -> list[str]:
     """High-confidence fallback signals; NOT a comprehensive phishing detector."""
     s = subject + '\n' + body
@@ -180,10 +216,21 @@ def request_solar(api_key: str, system_prompt: str, sender: str, subject: str, b
         with call(req, timeout=timeout) as res:
             raw = json.loads(res.read(500_000))
     except urllib.error.HTTPError as e:
+        # Upstage may report insufficient credit as 402, or in the structured
+        # error body with another HTTP status. 429 alone is *not* proof that
+        # credits are exhausted (it may simply be a rate limit).
+        try:
+            error_body = e.read(8192)
+        except Exception:
+            error_body = b''
+        if _looks_like_credit_exhaustion(e.code, error_body):
+            raise CreditsExhaustedError(
+                '사용 가능한 Solar Pro 4 API 크레딧(토큰)이 부족하여 분석할 수 없습니다.'
+            ) from None
         if e.code in (401, 403):
             raise ProviderError('Upstage 인증 또는 Solar Pro 4 사용 권한이 없습니다 (HTTP %d).' % e.code) from None
         if e.code == 429:
-            raise ProviderError('Upstage API 요청 제한에 도달했습니다. 잠시 후 다시 시도하세요.') from None
+            raise ProviderError('API 요청 횟수 제한에 도달했습니다. 잠시 후 다시 시도하세요.') from None
         raise ProviderError('Upstage API에서 오류가 발생했습니다 (HTTP %d).' % e.code) from None
     except (urllib.error.URLError, TimeoutError):
         raise ProviderError('Upstage API 서버에 연결할 수 없습니다. 네트워크를 확인하세요.') from None

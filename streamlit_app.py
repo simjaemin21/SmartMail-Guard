@@ -16,7 +16,7 @@ import streamlit as st
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "app"))
-from solar_engine import ProviderError, request_solar, MODEL  # noqa: E402
+from solar_engine import ProviderError, CreditsExhaustedError, request_solar, MODEL  # noqa: E402
 
 PROMPT = (ROOT / "Timely_AI" / "SYSTEM_PROMPT.txt").read_text(encoding="utf-8")
 SESSION_LIMIT = 4
@@ -199,6 +199,9 @@ def main():
                 with st.spinner("Solar Pro 4가 분석 중입니다..."):
                     data=request_solar(api_key, PROMPT, sender.strip(), subject.strip(),body.strip(),timeout=38)
                 st.session_state.smg_result=data
+            except CreditsExhaustedError:
+                st.error("사용 가능한 AI 토큰(크레딧)이 부족합니다. 현재 분석을 진행할 수 없습니다.")
+                st.info("크레딧이 복구되면 다시 시도할 수 있습니다. 자동으로 다른 분석 방식으로 전환하지 않습니다.")
             except ProviderError as exc:
                 st.error("AI 분석 실패: " + str(exc))
             except Exception:
