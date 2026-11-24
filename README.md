@@ -60,6 +60,20 @@ START_WINDOWS.bat                       기본 로컬 시연 실행
 START_WINDOWS_SOLAR.bat                 개인 API 키 이용 별도 실험
 ```
 
+## 🌐 외부 공개 체험 데모 (Streamlit)
+
+대회 제출용 외부 배포를 위해 `streamlit_app.py`를 제공합니다. **실제 배포 URL은 사용자 계정에서 배포 및 시크릿 창 테스트 후에만 확정됩니다.**
+
+- 사용 엔진: **Upstage Solar Pro 4 직접 API** (Timely AI 에이전트와는 독립된 경로)
+- API 키가 없으면 분석 불가 (규칙 기반 결과를 Solar 분석인 것처럼 표시하지 않음)
+- 방문자별 4회, 프로세스별 45회 호출 제한 (재시작 시 총량 초기화, 요금 한도 아님)
+- 체험 코드 필수. 공개 URL과 코드를 함께 제출해야 심사위원이 체험 가능
+- 실제 메일 자동 연결/URL·첨부 검사/실제 사용자 파일 업로드 등은 미구현
+
+**배포 절차:** [`docs/DEPLOY_STREAMLIT.md`](docs/DEPLOY_STREAMLIT.md) 참고. `requirements.txt`, `.streamlit/config.toml`, `app/solar_engine.py`가 함께 필요합니다. Streamlit Cloud Secrets에서 `UPSTAGE_API_KEY`와 `DEMO_ACCESS_CODE`를 설정합니다. 키·코드를 GitHub에 커밋하지 마세요.
+
+**로컬 `app/server.py`는 아래 설명대로 별개 규칙 기반 예시 웹 데모이며, 공개 Streamlit 앱의 실제 LLM 경로와 동일하지 않습니다.**
+
 ## 실행 방법
 
 Windows PowerShell에서 저장소 폴더를 연 후:
