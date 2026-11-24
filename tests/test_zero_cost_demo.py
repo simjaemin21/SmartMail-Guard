@@ -23,6 +23,21 @@ class OfflinePreviewTests(unittest.TestCase):
     def test_timeline(self):
         d=analyze('x','시험 공지','시험은 12월 15일 오전 10시입니다.')
         self.assertTrue(any('12월 15일 오전 10시' in s for s in d['timeline']))
+    def test_contest_selection_notice(self):
+        self.check('경진대회 본선 진출 안내',
+                   '축하드립니다. 심사 결과 본선 진출자로 선발되었습니다. 자세한 내용은 공식 홈페이지에서 확인해 주세요.',
+                   '정상 메일')
+    def test_contest_rejection_notice(self):
+        self.check('공모전 불합격 통보',
+                   '이번 공모전 심사 결과 최종 선발되지 않았음을 안내드립니다.', '정상 메일')
+    def test_contest_selection_not_final(self):
+        self.check('경진대회 선발 결과',
+                   '합격 여부는 아직 확정되지 않았습니다. 추후 안내하겠습니다.', '판단 보류')
+    def test_phishing_override_selection_notice(self):
+        self.check('대회 최종 합격',
+                   '수상자로 선정됐습니다. 상금을 받으려면 OTP 인증번호를 회신해 주세요.', '피싱 의심')
+    def test_lack_of_context_still_review(self):
+        self.check('문의', '자세한 것은 나중에 알려드리겠습니다.', '판단 보류')
     def test_free_mode_has_no_api_calls(self):
         source=(Path(__file__).resolve().parents[1]/'streamlit_app.py').read_text(encoding='utf-8')
         free=source.split('def show_free_demo():',1)[1].split('def show_live_demo():',1)[0]

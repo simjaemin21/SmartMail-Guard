@@ -16,7 +16,10 @@ PHISH_REQUESTS = [
 ]
 ADS = r"광고|할인|쿠폰|특가|무료배송|세일|판촉|프로모션|구매\s*(?:유도|추천|하러)|홍보|경품\s*이벤트"
 UNKNOWN = r"확인되지\s*않|확인\s*중|미확정|확정되지\s*않|추후\s*안내|정보가\s*없|정보는\s*없|정보\s*부재|소유자\s*정보|공식\s*공지.*반영되지\s*않|아직\s*결정되지\s*않"
-IMPORTANT = r"장학금|수강신청|수강정정|기말고사|시험|면접|과제\s*제출|현장실습|등록금|학사\s*일정|발표\s*자료"
+IMPORTANT = r"장학금|수강신청|수강정정|기말고사|시험|면접|과제\s*제출|현장실습|등록금|학사\s*일정|발표\s*자료|대회|공모전|경진대회|선발\s*결과|합격\s*통보|본선\s*진출"
+# Informational mail types. Lack of a known keyword alone is NOT proof of fraud.
+# This merely avoids defaulting legitimate selection notices to '판단 보류'.
+ROUTINE_NOTICE = r"\d{1,2}월|공지|제출|회의|면접|시험|수업|모임|운영|합격|불합격|선발|선정|결과\s*(?:안내|발표|통보|확인)|본선\s*진출|참가\s*(?:확정|안내)|심사\s*결과|당첨\s*안내"
 TIME_PATTERNS = [
     r"\d{1,2}월\s*\d{1,2}일\s*(?:오전|오후)?\s*\d{1,2}시(?:\s*\d{1,2}분)?\s*(?:부터|까지)?",
     r"\d{1,2}월\s*\d{1,2}일(?:부터|까지)?",
@@ -38,7 +41,7 @@ def analyze(sender: str, subject: str, body: str) -> dict:
         category='광고성 스팸'; risk='낮음'; importance='낮음';priority='낮음'
         indicators=['할인·쿠폰·구매 등 판촉 중심 표현이 발견됨']
         actions=['관심 없으면 무시하거나 메일 서비스의 수신 차단 기능을 검토하세요.', '관심 있다면 기존에 알고 있는 공식 쇼핑몰에서 조건을 확인하세요.']
-    elif re.search(UNKNOWN,content,re.I) or not re.search(r"\d{1,2}월|공지|제출|회의|면접|시험|수업|모임|운영",content):
+    elif re.search(UNKNOWN,content,re.I) or not re.search(ROUTINE_NOTICE,content,re.I):
         category='판단 보류'; risk='보통'; importance='높음' if re.search(IMPORTANT, content) else '보통';priority='보통'
         indicators=['발신 주체 또는 핵심 일정·대상·요청 정보가 불분명할 수 있음']
         actions=['이 메일만으로 요청의 진위를 확정하지 마세요.', '평소 이용하는 공식 포털·담당자 연락처로 내용을 확인하세요.']
