@@ -60,14 +60,24 @@ START_WINDOWS.bat                       기본 로컬 시연 실행
 START_WINDOWS_SOLAR.bat                 개인 API 키 이용 별도 실험
 ```
 
+## ✅ 대회 강의 기반 배포 가이드 (2026-11-24 영상 확인)
+
+강의는 `skill-to-service` 메타스킬과 **Vercel 커넥터**를 사용해 스킬을 웹서비스로 만들고, 실제 `*.vercel.app` 공개 URL로 시연합니다. GitHub→Vercel 연동도 소개합니다. 하지만 이 영상이 보여주는 배포법은 **Solar Pro 4 외부 API 인증이나 무료 크레딧을 제공하는 기능이 아닙니다.**
+
+기존 `*.streamlit.app` 공개 URL이 이미 있다면 Vercel로 다시 이전할 필요는 없습니다. 현재 공개 앱은 누구나 실행할 수 있는 **규칙 기반 무료 체험**과, 별도 사용 권한/크레딧이 있어야 작동하는 **Solar Pro 4 실시간 체험**을 탭으로 분리했습니다. 규칙 결과를 AI로 표기하거나 AI 실패 시 자동 대체하지 않습니다.
+
+- 강의 분석·Vercel 관련 유의점: [`docs/COURSE_SKILL_TO_SERVICE_DEPLOY_REVIEW.md`](docs/COURSE_SKILL_TO_SERVICE_DEPLOY_REVIEW.md)
+- Timely AI에 붙여넣을 `skill-to-service` 지시문: [`docs/SKILL_TO_SERVICE_TIMELY_PROMPT.txt`](docs/SKILL_TO_SERVICE_TIMELY_PROMPT.txt)
+- 공개 배포 기존 가이드: [`docs/DEPLOY_STREAMLIT.md`](docs/DEPLOY_STREAMLIT.md)
+
 ## 🌐 외부 공개 체험 데모 (Streamlit)
 
 대회 제출용 외부 배포를 위해 `streamlit_app.py`를 제공합니다. **실제 배포 URL은 사용자 계정에서 배포 및 시크릿 창 테스트 후에만 확정됩니다.**
 
-- 사용 엔진: **Upstage Solar Pro 4 직접 API** (Timely AI 에이전트와는 독립된 경로)
-- API 키가 없으면 분석 불가 (규칙 기반 결과를 Solar 분석인 것처럼 표시하지 않음)
+- 두 체험 경로: **무료 규칙 기반 UI(LLM 아님, 비로그인)** 및 **별도 Upstage Solar Pro 4 직접 API(체험 코드 필요)**
+- Upstage의 무료 크레딧이 소진되면 **실시간 AI 탭은 중단**되며, 규칙 기반 탭으로 자동 전환하지 않음
 - 방문자별 4회, 프로세스별 45회 호출 제한 (재시작 시 총량 초기화, 요금 한도 아님)
-- 체험 코드 필수. 공개 URL과 코드를 함께 제출해야 심사위원이 체험 가능
+- 체험 코드는 실시간 AI 탭에만 필요함. 무료 규칙 체험은 시크릿 창에서 바로 이용 가능
 - 실제 메일 자동 연결/URL·첨부 검사/실제 사용자 파일 업로드 등은 미구현
 
 **배포 절차:** [`docs/DEPLOY_STREAMLIT.md`](docs/DEPLOY_STREAMLIT.md) 참고. `requirements.txt`, `.streamlit/config.toml`, `app/solar_engine.py`가 함께 필요합니다. Streamlit Cloud Secrets에서 `UPSTAGE_API_KEY`와 `DEMO_ACCESS_CODE`를 설정합니다. 키·코드를 GitHub에 커밋하지 마세요.
